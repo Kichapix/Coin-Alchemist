@@ -1,0 +1,16 @@
+{
+    "goals": [
+        {
+            "name": "Ноутбук",
+            "cost": 60000,
+            "priority": 10,
+            "category": "Техника"
+        },
+        {
+            "name": "Курсы Python",
+            "cost": 15000,
+            "priority": 8,
+            "category": "Образование"
+        }
+    ]
+}
