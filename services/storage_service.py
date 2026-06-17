@@ -1,4 +1,5 @@
 import json
+import os
 from models.goal import Goal
 
 class StorageService:
@@ -24,6 +25,9 @@ class StorageService:
 
     def load_goals(self, filepath):
 
+        if not os.path.exists(filepath):
+            return []
+
         with open(filepath, "r", encoding="utf-8") as file:
 
             data = json.load(file)
@@ -31,11 +35,8 @@ class StorageService:
         goals = []
 
         for goal_data in data["goals"]:
-
             goals.append(
-
                 Goal.from_dict(goal_data)
-
             )
 
         return goals
