@@ -1,24 +1,10 @@
 from services.budget_service import BudgetService
 from ui.add_goal_dialog import AddGoalDialog
+from algorithms.knapsack_solver import KnapsackSolver
+from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIntValidator
-from PySide6.QtWidgets import (
-    QWidget,
-    QMainWindow,
-    QHBoxLayout,
-    QVBoxLayout,
-    QFrame,
-    QLabel,
-    QPushButton,
-    QLineEdit,
-    QTableWidget,
-    QTableWidgetItem,
-    QAbstractItemView,
-    QHeaderView,
-    QScrollArea,
-    QGridLayout
-)
-
+from PySide6.QtWidgets import *
 
 class MainWindow(QMainWindow):
 
@@ -27,7 +13,7 @@ class MainWindow(QMainWindow):
 
         self.budget_service = BudgetService()
         self.selected_goal = None
-        self.filepath = "data/goals.json"
+        self.filepath = Path("data/goals.json")
         self.budget_service.load_goals(
             self.filepath
         )
@@ -204,15 +190,15 @@ class MainWindow(QMainWindow):
             border: none;
         """)
 
-        budget_input = QLineEdit()
+        self.budget_input = QLineEdit()
 
-        budget_input.setPlaceholderText("50000")
+        self.budget_input.setPlaceholderText("50000")
 
-        budget_input.setValidator(
+        self.budget_input.setValidator(
             QIntValidator(0, 100000000)
         )
 
-        budget_input.setStyleSheet("""
+        self.budget_input.setStyleSheet("""
             QLineEdit {
                 background-color: #0F172A;
                 color: white;
@@ -226,7 +212,7 @@ class MainWindow(QMainWindow):
         budget_layout.setSpacing(5)
 
         budget_layout.addWidget(budget_title)
-        budget_layout.addWidget(budget_input)
+        budget_layout.addWidget(self.budget_input)
 
         content_layout.addWidget(budget_card)
         content_layout.addSpacing(20)
@@ -290,60 +276,6 @@ class MainWindow(QMainWindow):
             self.scroll_area,
             1
         )
-
-        self.goals_table = QTableWidget()
-
-        self.goals_table.setAlternatingRowColors(True)
-
-        self.goals_table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.Stretch
-        )
-
-        self.goals_table.verticalHeader().setVisible(False)
-
-        self.goals_table.verticalHeader().setDefaultSectionSize(
-            42
-        )
-
-        self.goals_table.horizontalHeader().setSectionResizeMode(
-            QHeaderView.Stretch
-        )
-
-        self.goals_table.setEditTriggers(
-
-            QAbstractItemView.NoEditTriggers
-
-        )
-
-        self.goals_table.setColumnCount(4)
-
-        self.goals_table.setHorizontalHeaderLabels([
-            "Название",
-            "Категория",
-            "Стоимость",
-            "Приоритет"
-        ])
-
-        self.goals_table.setStyleSheet("""
-        QTableWidget {
-            background-color: #111827;
-            color: white;
-            border-radius: 12px;
-            gridline-color: #1E293B;
-            alternate-background-color: #172033;
-            selection-background-color: #7C3AED;
-        }
-
-        QHeaderView::section {
-            background-color: #1E293B;
-            color: white;
-            padding: 8px;
-            border: none;
-        }
-        """)
-
-        self.goals_table.hide()
-        content_layout.addSpacing(15)
 
         self.add_goal_button = QPushButton("+ Добавить цель")
         self.add_goal_button.setFixedSize(180, 45)
@@ -414,15 +346,11 @@ class MainWindow(QMainWindow):
             self.open_add_goal_dialog
         )
 
-        self.delete_goal_button.clicked.connect(
-            self.delete_selected_goal
-        )
-
-        optimize_button = QPushButton(
+        self.optimize_button = QPushButton(
             "⚡ Оптимизировать план"
         )
-        optimize_button.setMinimumHeight(80)
-        optimize_button.setStyleSheet("""
+        self.optimize_button.setMinimumHeight(80)
+        self.optimize_button.setStyleSheet("""
         QPushButton {
             background-color: #7C3AED;
             color: white;
@@ -441,7 +369,11 @@ class MainWindow(QMainWindow):
             background-color: #6D28D9;
         }
         """)
-        content_layout.addWidget(optimize_button)
+        content_layout.addWidget(self.optimize_button)
+
+        self.optimize_button.clicked.connect(
+            self.optimize_plan
+        )
         # ===== ДОБАВЛЯЕМ В ОКНО =====
 
         main_layout.addWidget(sidebar)
@@ -464,35 +396,6 @@ class MainWindow(QMainWindow):
             )
 
             self.refresh_table()
-
-    def add_goal_to_table(self, goal):
-        row = self.goals_table.rowCount()
-
-        self.goals_table.insertRow(row)
-
-        self.goals_table.setItem(
-            row,
-            0,
-            QTableWidgetItem(goal.name)
-        )
-
-        self.goals_table.setItem(
-            row,
-            1,
-            QTableWidgetItem(goal.category)
-        )
-
-        self.goals_table.setItem(
-            row,
-            2,
-            QTableWidgetItem(str(goal.cost))
-        )
-
-        self.goals_table.setItem(
-            row,
-            3,
-            QTableWidgetItem(str(goal.priority))
-        )
 
     def refresh_table(self):
 
@@ -534,7 +437,7 @@ class MainWindow(QMainWindow):
                 self.select_goal(g)
             )
 
-            card.setFixedHeight(150)
+            card.setMinimumWidth(300)
 
             card_layout = QVBoxLayout()
             card.setLayout(card_layout)
@@ -572,27 +475,6 @@ class MainWindow(QMainWindow):
 
             index += 1
 
-    def delete_selected_goal(self):
-
-        row = self.goals_table.currentRow()
-
-        if row < 0:
-            return
-
-        goals = self.budget_service.get_goals()
-
-        goal = goals[row]
-
-        self.budget_service.remove_goal(
-            goal
-        )
-
-        self.budget_service.save_goals(
-            self.filepath
-        )
-
-        self.refresh_table()
-
     def select_goal(self, goal):
         self.selected_goal = goal
         self.refresh_table()
@@ -602,10 +484,96 @@ class MainWindow(QMainWindow):
         if not self.selected_goal:
             return
 
+        reply = QMessageBox.question(
+            self,
+            "Удаление цели",
+            f'Удалить цель "{self.selected_goal.name}"?',
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+
+        if reply != QMessageBox.Yes:
+            return
+
         self.budget_service.remove_goal(
             self.selected_goal
         )
 
+        self.selected_goal = None
+
+        self.budget_service.save_goals(
+            self.filepath
+        )
+
         self.refresh_table()
 
-        self.selected_goal = None
+    def optimize_plan(self):
+
+
+        budget_text = self.budget_input.text()
+
+        if not budget_text:
+            return
+
+        budget = int(budget_text)
+
+        if budget <= 0:
+            QMessageBox.warning(
+                self,
+                "Ошибка",
+                "Бюджет должен быть больше 0."
+            )
+            return
+
+        if budget > 100000:
+            QMessageBox.warning(
+                self,
+                "Ошибка",
+                "Бюджет должен быть не больше 100000 ₽."
+            )
+            return
+
+        goals = self.budget_service.get_goals()
+
+        if not goals:
+            QMessageBox.information(
+                self,
+                "Нет целей",
+                "Добавьте хотя бы одну цель для оптимизации."
+            )
+            return
+
+        solver = KnapsackSolver()
+
+        result = solver.solve(
+            goals,
+            budget
+        )
+
+        if not result["goals"]:
+            QMessageBox.information(
+                self,
+                "План не найден",
+                "Для указанного бюджета невозможно выбрать ни одной цели."
+            )
+            return
+
+        goals_text = ""
+
+        for goal in result["goals"]:
+            goals_text += f"✓ {goal.name}\n"
+
+        message = (
+            f"Оптимальный план\n\n"
+            f"{goals_text}\n"
+            f"Общая стоимость: "
+            f"{result['total_cost']} ₽\n"
+            f"Суммарный приоритет: "
+            f"{result['total_priority']}"
+        )
+
+        QMessageBox.information(
+            self,
+            "Результат оптимизации",
+            message
+        )

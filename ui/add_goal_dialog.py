@@ -87,9 +87,23 @@ class AddGoalDialog(QDialog):
         }
         """
 
+        error_style = """
+        QLineEdit {
+            background-color: #0F172A;
+            color: white;
+            border: 2px solid #EF4444;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 15px;
+        }
+        """
+
         self.name_input.setStyleSheet(field_style)
 
         self.cost_input.setStyleSheet(field_style)
+
+        self.field_style = field_style
+        self.error_style = error_style
 
         # Кнопка
 
@@ -140,18 +154,39 @@ class AddGoalDialog(QDialog):
 
     def save_goal(self):
 
-        name = self.name_input.text()
+        self.name_input.setStyleSheet(
+            self.field_style
+        )
 
-        cost = self.cost_input.text()
+        self.cost_input.setStyleSheet(
+            self.field_style
+        )
+
+        has_error = False
+
+        name = self.name_input.text().strip()
+
+        cost = self.cost_input.text().strip()
 
         priority = self.priority_selector.get_value()
 
         category = self.category_selector.get_value()
 
         if not name:
-            return
+            self.name_input.setStyleSheet(
+                self.error_style
+            )
+
+            has_error = True
 
         if not cost:
+            self.cost_input.setStyleSheet(
+                self.error_style
+            )
+
+            has_error = True
+
+        if has_error:
             return
 
         self.goal = Goal(
