@@ -1,6 +1,7 @@
 from services.budget_service import BudgetService
 from ui.add_goal_dialog import AddGoalDialog
 from algorithms.knapsack_solver import KnapsackSolver
+from algorithms.greedy_solver import GreedySolver
 from pathlib import Path
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIntValidator
@@ -92,10 +93,9 @@ class MainWindow(QMainWindow):
         sidebar_layout.addSpacing(40)
 
         goals_button = QPushButton("🎯  Цели")
-        opt_button = QPushButton("📈  Оптимизация")
-        compare_button = QPushButton("⚖️  Сравнение")
+        self.opt_button = QPushButton("📈  Оптимизация")
+        self.compare_button = QPushButton("⚖️  Сравнение")
         saved_button = QPushButton("📄  Планы")
-        settings_button = QPushButton("⚙️  Настройки")
 
         menu_style = """
         QPushButton {
@@ -118,16 +118,14 @@ class MainWindow(QMainWindow):
         """
 
         goals_button.setStyleSheet(menu_style)
-        opt_button.setStyleSheet(menu_style)
-        compare_button.setStyleSheet(menu_style)
+        self.opt_button.setStyleSheet(menu_style)
+        self.compare_button.setStyleSheet(menu_style)
         saved_button.setStyleSheet(menu_style)
-        settings_button.setStyleSheet(menu_style)
 
         sidebar_layout.addWidget(goals_button)
-        sidebar_layout.addWidget(opt_button)
-        sidebar_layout.addWidget(compare_button)
+        sidebar_layout.addWidget(self.opt_button)
+        sidebar_layout.addWidget(self.compare_button)
         sidebar_layout.addWidget(saved_button)
-        sidebar_layout.addWidget(settings_button)
 
         sidebar_layout.addStretch()
 
@@ -346,32 +344,11 @@ class MainWindow(QMainWindow):
             self.open_add_goal_dialog
         )
 
-        self.optimize_button = QPushButton(
-            "⚡ Оптимизировать план"
+        self.compare_button.clicked.connect(
+            self.compare_algorithms
         )
-        self.optimize_button.setMinimumHeight(80)
-        self.optimize_button.setStyleSheet("""
-        QPushButton {
-            background-color: #7C3AED;
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-size: 20px;
-            font-weight: bold;
-            padding: 20px;
-        }
 
-        QPushButton:hover {
-            background-color: #8B5CF6;
-        }
-
-        QPushButton:pressed {
-            background-color: #6D28D9;
-        }
-        """)
-        content_layout.addWidget(self.optimize_button)
-
-        self.optimize_button.clicked.connect(
+        self.opt_button.clicked.connect(
             self.optimize_plan
         )
         # ===== ДОБАВЛЯЕМ В ОКНО =====
@@ -575,5 +552,52 @@ class MainWindow(QMainWindow):
         QMessageBox.information(
             self,
             "Результат оптимизации",
+            message
+        )
+
+    def compare_algorithms(self):
+
+        budget_text = self.budget_input.text()
+
+        if not budget_text:
+            return
+
+        budget = int(budget_text)
+
+        goals = self.budget_service.get_goals()
+
+        if not goals:
+            QMessageBox.information(
+                self,
+                "Нет целей",
+                "Добавьте хотя бы одну цель."
+            )
+            return
+
+        greedy_solver = GreedySolver()
+        knapsack_solver = KnapsackSolver()
+
+        greedy_result = greedy_solver.solve(
+            goals,
+            budget
+        )
+
+        knapsack_result = knapsack_solver.solve(
+            goals,
+            budget
+        )
+
+        message = (
+            "GREEDY\n\n"
+            f"Стоимость: {greedy_result['total_cost']} ₽\n"
+            f"Приоритет: {greedy_result['total_priority']}\n\n"
+            "KNAPSACK\n\n"
+            f"Стоимость: {knapsack_result['total_cost']} ₽\n"
+            f"Приоритет: {knapsack_result['total_priority']}"
+        )
+
+        QMessageBox.information(
+            self,
+            "Сравнение алгоритмов",
             message
         )
