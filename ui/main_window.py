@@ -1,5 +1,6 @@
 from services.budget_service import BudgetService
 from ui.add_goal_dialog import AddGoalDialog
+from ui.result_dialog import ResultDialog
 from algorithms.knapsack_solver import KnapsackSolver
 from algorithms.greedy_solver import GreedySolver
 from pathlib import Path
@@ -541,19 +542,20 @@ class MainWindow(QMainWindow):
             goals_text += f"✓ {goal.name}\n"
 
         message = (
-            f"Оптимальный план\n\n"
             f"{goals_text}\n"
+            f"━━━━━━━━━━━━━━\n\n"
             f"Общая стоимость: "
-            f"{result['total_cost']} ₽\n"
+            f"{result['total_cost']} ₽\n\n"
             f"Суммарный приоритет: "
             f"{result['total_priority']}"
         )
 
-        QMessageBox.information(
-            self,
-            "Результат оптимизации",
+        dialog = ResultDialog(
+            "Оптимальный план",
             message
         )
+
+        dialog.exec()
 
     def compare_algorithms(self):
 
@@ -587,17 +589,41 @@ class MainWindow(QMainWindow):
             budget
         )
 
+        greedy_goals = ""
+
+        for goal in greedy_result["goals"]:
+            greedy_goals += f"✓ {goal.name}\n"
+
+        knapsack_goals = ""
+
+        for goal in knapsack_result["goals"]:
+            knapsack_goals += f"✓ {goal.name}\n"
+
+        if greedy_result["total_priority"] > knapsack_result["total_priority"]:
+            winner = "🏆 Победитель: GREEDY"
+
+        elif knapsack_result["total_priority"] > greedy_result["total_priority"]:
+            winner = "🏆 Победитель: KNAPSACK"
+
+        else:
+            winner = "🤝 Ничья"
+
         message = (
             "GREEDY\n\n"
+            f"{greedy_goals}\n"
             f"Стоимость: {greedy_result['total_cost']} ₽\n"
             f"Приоритет: {greedy_result['total_priority']}\n\n"
+            "━━━━━━━━━━━━━━\n\n"
             "KNAPSACK\n\n"
+            f"{knapsack_goals}\n"
             f"Стоимость: {knapsack_result['total_cost']} ₽\n"
-            f"Приоритет: {knapsack_result['total_priority']}"
+            f"Приоритет: {knapsack_result['total_priority']}\n\n"
+            f"{winner}"
         )
 
-        QMessageBox.information(
-            self,
+        dialog = ResultDialog(
             "Сравнение алгоритмов",
             message
         )
+
+        dialog.exec()
