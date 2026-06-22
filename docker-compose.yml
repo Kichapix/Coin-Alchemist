@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    ports:
+      - "6080:6080"
+    environment:
+      - DISPLAY=:99
+      - QT_QPA_PLATFORM=xcb
