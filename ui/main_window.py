@@ -16,13 +16,18 @@ class MainWindow(QMainWindow):
         self.budget_service = BudgetService()
         self.selected_goal = None
         self.filepath = Path("data/goals.json")
-        self.budget_service.load_goals(
-            self.filepath
-        )
+
+        try:
+            self.budget_service.load_goals(
+                self.filepath
+            )
+        except FileNotFoundError:
+            pass
+
         self.setWindowTitle("Coin Alchemist")
 
         self.resize(1100, 700)
-        self.setMinimumSize(1000, 650)
+        self.showMaximized()
 
         self.setStyleSheet("""
             QMainWindow {
@@ -91,12 +96,8 @@ class MainWindow(QMainWindow):
         sidebar_layout.addWidget(title)
         sidebar_layout.addWidget(subtitle)
 
-        sidebar_layout.addSpacing(40)
-
-        goals_button = QPushButton("🎯  Цели")
         self.opt_button = QPushButton("📈  Оптимизация")
         self.compare_button = QPushButton("⚖️  Сравнение")
-        saved_button = QPushButton("📄  Планы")
 
         menu_style = """
         QPushButton {
@@ -118,15 +119,11 @@ class MainWindow(QMainWindow):
         }
         """
 
-        goals_button.setStyleSheet(menu_style)
         self.opt_button.setStyleSheet(menu_style)
         self.compare_button.setStyleSheet(menu_style)
-        saved_button.setStyleSheet(menu_style)
 
-        sidebar_layout.addWidget(goals_button)
         sidebar_layout.addWidget(self.opt_button)
         sidebar_layout.addWidget(self.compare_button)
-        sidebar_layout.addWidget(saved_button)
 
         sidebar_layout.addStretch()
 
@@ -527,6 +524,7 @@ class MainWindow(QMainWindow):
             goals,
             budget
         )
+
 
         if not result["goals"]:
             QMessageBox.information(
