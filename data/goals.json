@@ -3,13 +3,25 @@
         {
             "name": "Ноутбук",
             "cost": 60000,
-            "priority": 10,
+            "priority": 7,
             "category": "Техника"
         },
         {
-            "name": "Курсы Python",
+            "name": "Телефон",
+            "cost": 40000,
+            "priority": 6,
+            "category": "Техника"
+        },
+        {
+            "name": "Курс",
             "cost": 15000,
             "priority": 8,
+            "category": "Образование"
+        },
+        {
+            "name": "Книга",
+            "cost": 5000,
+            "priority": 3,
             "category": "Образование"
         }
     ]
