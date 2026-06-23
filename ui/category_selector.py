@@ -19,11 +19,11 @@ class CategorySelector(QWidget):
         self.setLayout(layout)
 
         categories = {
-            "Техника": "🖥",
-            "Образование": "🎓",
-            "Путешествия": "✈",
-            "Дом": "🏠",
-            "Другое": "📦"
+            "Техника": "",
+            "Образование": "",
+            "Путешествия": "",
+            "Дом": "",
+            "Другое": ""
         }
 
         for category, icon in categories.items():
