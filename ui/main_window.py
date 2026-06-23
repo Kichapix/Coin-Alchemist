@@ -59,16 +59,6 @@ class MainWindow(QMainWindow):
         sidebar_layout = QVBoxLayout()
         sidebar.setLayout(sidebar_layout)
 
-        # Логотип
-        logo = QLabel("🧙")
-        logo.setAlignment(Qt.AlignCenter)
-
-        logo.setStyleSheet("""
-            color: #7C3AED;
-            font-size: 42px;
-            border: none;
-        """)
-
         # Заголовок
         title = QLabel("Coin Alchemist")
         title.setAlignment(Qt.AlignCenter)
@@ -92,12 +82,11 @@ class MainWindow(QMainWindow):
 
         sidebar_layout.addSpacing(30)
 
-        sidebar_layout.addWidget(logo)
         sidebar_layout.addWidget(title)
         sidebar_layout.addWidget(subtitle)
 
-        self.opt_button = QPushButton("📈  Оптимизация")
-        self.compare_button = QPushButton("⚖️  Сравнение")
+        self.opt_button = QPushButton("Оптимизация")
+        self.compare_button = QPushButton("Сравнение")
 
         menu_style = """
         QPushButton {
@@ -273,7 +262,7 @@ class MainWindow(QMainWindow):
             1
         )
 
-        self.add_goal_button = QPushButton("+ Добавить цель")
+        self.add_goal_button = QPushButton("Добавить цель")
         self.add_goal_button.setFixedSize(180, 45)
 
         self.add_goal_button.setStyleSheet("""
@@ -295,7 +284,7 @@ class MainWindow(QMainWindow):
         }
         """)
 
-        self.delete_goal_button = QPushButton("🗑 Удалить цель")
+        self.delete_goal_button = QPushButton("Удалить цель")
         self.delete_goal_button.setFixedSize(180,45)
 
         self.delete_goal_button.setStyleSheet("""
@@ -598,13 +587,13 @@ class MainWindow(QMainWindow):
             knapsack_goals += f"✓ {goal.name}\n"
 
         if greedy_result["total_priority"] > knapsack_result["total_priority"]:
-            winner = "🏆 Победитель: GREEDY"
+            winner = "Победитель: GREEDY"
 
         elif knapsack_result["total_priority"] > greedy_result["total_priority"]:
-            winner = "🏆 Победитель: KNAPSACK"
+            winner = "Победитель: KNAPSACK"
 
         else:
-            winner = "🤝 Ничья"
+            winner = "Ничья"
 
         message = (
             "GREEDY\n\n"
