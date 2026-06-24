@@ -29,6 +29,7 @@ Coin Alchemist - приложение для планирования лично
 │   ├── test_budget_service.py
 │   ├── test_goal.py
 │   ├── test_greedy_solver.py
+│   ├── test_integration.py
 │   ├── test_knapsack_solver.py
 │   └── test_storage_service.py
 ├── ui/
