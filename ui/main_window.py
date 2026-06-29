@@ -553,6 +553,22 @@ class MainWindow(QMainWindow):
 
         budget = int(budget_text)
 
+        if budget <= 0:
+            QMessageBox.warning(
+                self,
+                "Ошибка",
+                "Бюджет должен быть больше 0."
+            )
+            return
+
+        if budget > 100000:
+            QMessageBox.warning(
+                self,
+                "Ошибка",
+                "Бюджет должен быть не больше 100000 ₽."
+            )
+            return
+
         goals = self.budget_service.get_goals()
 
         if not goals:
